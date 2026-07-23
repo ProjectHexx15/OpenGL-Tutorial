@@ -1,9 +1,12 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+
+#include <fstream>
+#include <sstream>
+#include <streambuf>
+#include <string>
+
 
 // Callback function to adjust the viewport when the window is resized
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -11,17 +14,13 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 // Function to process input from the user
 void processInput(GLFWwindow* window);
 
+// Function to load shader source code from a file
+std::string loadShaderSrc(const char* filename);
+
 int main() 
 {
-
-	// glm test
-	glm::vec4 vec(1.0f, 1.0f, 1.0f, 1.0f);
-	glm::mat4 trans = glm::mat4(1.0f); // identity matrix
-	trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0f)); // translation
-	//trans = glm::rotate(trans, glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)); // rotation
-	// trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5)); // scale
-	vec = trans * vec;
-	std::cout << vec.x << " " << vec.y << " " << vec.z << std::endl;
+	int success;
+	char infolog[512];
 
 	// Initialize GLFW
 	glfwInit();
@@ -65,6 +64,71 @@ int main()
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
+	// shaders
+
+	// compile vertex shader
+
+	unsigned int vertexShader;
+	// create a vertex shader object
+	vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	// load the vertex shader source code from a file
+	std::string vertShaderSrc = loadShaderSrc("Assets/vertexShader.glsl");
+	// convert the vertex shader source code to a C-style string
+	const GLchar* vertShader = vertShaderSrc.c_str();
+	// attach the vertex shader source code to the vertex shader object
+	glShaderSource(vertexShader, 1, &vertShader, NULL);
+	glCompileShader(vertexShader);
+
+	// check for vertex shader compile errors
+	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+	if (!success)
+	{
+		glGetShaderInfoLog(vertexShader, 512, NULL, infolog);
+		std::cout << "Error compiling vertex shader: " << infolog << std::endl;
+	}
+
+	// compile fragment shader
+
+	unsigned int fragmentShader;
+	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER); 
+	// create a fragment shader object
+	std::string fragShaderSrc = loadShaderSrc("Assets / fragmentShader.glsl"); 
+	// load the fragment shader source code from a file
+	const GLchar* fragShader = fragShaderSrc.c_str(); 
+	// convert the fragment shader source code to a C-style string
+	glShaderSource(fragmentShader, 1, &fragShader, NULL);
+	// attach the fragment shader source code to the fragment shader object
+	glCompileShader(fragmentShader);
+
+	// check for fragment shader compile errors
+	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+	if (!success)
+	{
+		glGetShaderInfoLog(fragmentShader, 512, NULL, infolog);
+		std::cout << "Error compiling fragment shader: " << infolog << std::endl;
+	}
+
+	// link shaders to create a shader program
+	unsigned int shaderProgram;
+	shaderProgram = glCreateProgram();
+
+	// attach the vertex and fragment shaders to the shader program
+	glAttachShader(shaderProgram, vertexShader);
+	glAttachShader(shaderProgram, fragmentShader);
+	glLinkProgram(shaderProgram);
+
+	// check for linking errors
+	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+	if (!success)
+	{
+		glGetProgramInfoLog(shaderProgram, 512, NULL, infolog);
+		std::cout << "Error linking shader program: " << infolog << std::endl;
+	}
+
+	// delete the shader objects once we've linked them into the program, as we no longer need them
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
+
 	// Main render loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -96,5 +160,30 @@ void processInput(GLFWwindow* window)
 	{
 		glfwSetWindowShouldClose(window, true);
 	}
+}
+
+std::string loadShaderSrc(const char* filename)
+{
+	std::ifstream file; //this is the file stream that will be used to read the shader source code from a file
+	std::stringstream buf; //this is the string stream that will be used to store the shader source code in a string
+
+	std::string ret = ""; // return string that will be used to store the shader source code
+
+	file.open(filename); //open the file
+
+	if (file.is_open())
+	{
+		buf << file.rdbuf(); //read the file into the string stream
+		ret = buf.str(); //convert the string stream into a string
+	}
+	else
+	{
+		std::cout << "Could not open file: " << filename << std::endl;
+	}
+
+	file.close(); // close the file so it doesnt leak memory
+
+	return ret; // return the shader source code
+
 }
 
