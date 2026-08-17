@@ -72,7 +72,7 @@ int main()
 	// create a vertex shader object
 	vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	// load the vertex shader source code from a file
-	std::string vertShaderSrc = loadShaderSrc("Assets/vertexShader.glsl");
+	std::string vertShaderSrc = loadShaderSrc("vertexShader.vert");
 	// convert the vertex shader source code to a C-style string
 	const GLchar* vertShader = vertShaderSrc.c_str();
 	// attach the vertex shader source code to the vertex shader object
@@ -92,7 +92,7 @@ int main()
 	unsigned int fragmentShader;
 	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER); 
 	// create a fragment shader object
-	std::string fragShaderSrc = loadShaderSrc("Assets / fragmentShader.glsl"); 
+	std::string fragShaderSrc = loadShaderSrc("fragShader.frag"); 
 	// load the fragment shader source code from a file
 	const GLchar* fragShader = fragShaderSrc.c_str(); 
 	// convert the fragment shader source code to a C-style string
@@ -129,6 +129,35 @@ int main()
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
+	// vertex array
+	float vertices[] =	{
+		// first triangle
+		0.5f, 0.5f, 0.0f, // top right
+		-0.5f, 0.5f, 0.0f, // top left
+		-0.5f, -0.5f, 0.0f, // bottom left
+
+		// seccond triangle
+		-0.5f, -0.5f, 0.0f, // bottom left
+		0.5f, -0.5f, 0.0f, // bottom right
+		0.5f, 0.5f, 0.0f // top right
+	};
+
+	// VAO, VBO
+	unsigned int VAO, VBO;
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+
+	// bind VAO
+	glBindVertexArray(VAO);
+
+	// bind VBO
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	// set attribute pointer
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
 	// Main render loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -138,6 +167,11 @@ int main()
 		// render
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		// draw shapes
+		glBindVertexArray(VAO);
+		glUseProgram(shaderProgram);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		// send new frame to the screen
 		glfwSwapBuffers(window);
