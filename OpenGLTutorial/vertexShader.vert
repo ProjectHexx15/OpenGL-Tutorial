@@ -1,7 +1,14 @@
 #version 330 core
-layout (location = 0) in vec3 aPos; // in the layout location 0 we have the position of the vertex
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aColour;
+
+out vec3 ourColour;
+
+uniform mat4 transform;
 
 void main()
 {
-	gl_Position = vec4(aPos, 1.0); // set the position of the vertex in clip space, gl_Position must be set in the vertex shader
+	gl_Position = transform * vec4(aPos, 1.0);
+
+	ourColour = aColour;
 }

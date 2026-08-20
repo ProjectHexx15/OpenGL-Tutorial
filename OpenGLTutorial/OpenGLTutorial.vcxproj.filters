@@ -27,6 +27,9 @@
     <ClCompile Include="stb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="fragShader.frag">
@@ -35,5 +38,16 @@
     <None Include="vertexShader.vert">
       <Filter>Assets</Filter>
     </None>
+    <None Include="fragShader2.frag">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="vertexShader2.vert">
+      <Filter>Assets</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Shader.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
